@@ -11,17 +11,21 @@ By: [Jason van Biezen](https://github.com/jasonvanbiezen)
 
 ## Requirements
 
-1. Bash Terminal
-2. Python 2.7
-3. PostgreSQL
+1. Python 2.7
+2. PostgreSQL (Not required if using vagrant)
+3. Vagrant
+4. VirtuaBox (Or other virtual PC)
 
 ## Project 2
 
-Swiss Tournament Database Sceme and Python methods and test driver
+Swiss Tournament Database Sceme and Python methods and test driver.  Instructions below for launching tests in a vagrant session.
 
 1. From repository root, navigate to vagrant/tournament directory.
-2. Project includes database file tournament.sql, tournament methods in tournament.py, and unit test file tournament_test.py
-3. Run tests by executing the test file: # python tournament_test.py
+2. Start vagrant: # vagrant up
+3. SSH into vagrant session: # vagrant ssh
+4. Navigation to tounament directory /vagrant/tournament
+5. Project includes database file tournament.sql, tournament methods in tournament.py, and unit test file tournament_test.py
+6. Run tests by executing the test file: # python tournament_test.py
 
 ## License
 
