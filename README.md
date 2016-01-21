@@ -14,7 +14,7 @@ By: [Jason van Biezen](https://github.com/jasonvanbiezen)
 1. Python 2.7
 2. PostgreSQL (Not required if using vagrant)
 3. Vagrant
-4. VirtuaBox (Or other virtual PC)
+4. VirtualBox (Or other virtual PC)
 
 ## Project 2
 
