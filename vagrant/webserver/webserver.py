@@ -21,12 +21,15 @@ template = Template("""
 
 restaurantTemplate = Template("""
 <html><body>
+<center><h1>Restaurant Management</h1></center>
+<a href="/restaurants/new">Create a new restaurant</a>
+<hr />
 {{content}}
 <hr />
 {% for r in restaurants %}
     {{r.name}}<br />
-    <a href='/restaurants/edit?name={{r.name}}&id={{r.id}}'>Edit</a><br />
-    <a href='/restaurants/delete?name={{r.name}}&id={{r.id}}'>Delete</a><br />
+    <a href='/restaurants/{{r.id}}/edit?name={{r.name}}'>Edit</a><br />
+    <a href='/restaurants/{{r.id}}/delete?name={{r.name}}'>Delete</a><br />
     <br /><br />
 {% endfor %}
 </body></html>
@@ -34,7 +37,7 @@ restaurantTemplate = Template("""
 
 restaurantEditTemplate = Template("""
 Change the name of restaurant {{id}}: <b>{{name}}</b><br />
-<form method='POST' enctype='multipart/form-data' action='/restaurants/assign_new_name'>
+<form method='POST' enctype='multipart/form-data' action='{{action_url}}'>
 <input name='new_name' type='text'><br />
 <input type='submit' value='Confirm'>
 </form>
@@ -62,10 +65,10 @@ class WebserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             path_parts = self.path.split('?')
-            print(path_parts)
             url_path = path_parts[0]
             variables = path_parts[1] if len(path_parts) > 1 else None
             var_map = parse_qs(variables) if variables is not None else dict()
+            
             if url_path.endswith('/hello'):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -89,30 +92,48 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 content = newRestaurantTemplate.render()
                 restaurants = session.query(Restaurant).all()
                 self.wfile.write(restaurantTemplate.render(restaurants=restaurants, content=content)) 
-            elif url_path.endswith('/restaurants/edit'):
-                if variables is not None and len(var_map.keys()) > 1:
-                    print var_map
-                    restaurant_name = var_map['name']
-                    restaurant_id = var_map['id']
-                    self.send_response(200)
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-                    restaurants = session.query(Restaurant).all()
-                    content = restaurantEditTemplate.render(name=restaurant_name, id=restaurant_id)
-                    self.wfile.write(restaurantEditTemplate.render(content=content, restaurants=restaurants))
-                else:
-                    pass
+            elif url_path.startswith('/restaurants') and url_path.endswith('/edit'):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                url_comp = url_path.split('/')
+                restaurant_id = url_comp[2]
+                r = session.query(Restaurant).filter(Restaurant.id==int(restaurant_id)).first()
+                restaurant_name = r.name if r is not None else ''
+                restaurants = session.query(Restaurant).all()
+                content = restaurantEditTemplate.render(name=restaurant_name, id=restaurant_id, action_url=url_path)
+                self.wfile.write(restaurantTemplate.render(content=content, restaurants=restaurants))
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write("<html><body><h1>Page not found!</h1></body></html>")
-        except:
+        except Exception as e:
+            print type(e), e.args
             self.send_error(404, "File not found %s" % self.path)
     def do_POST(self):
         try:
-            if self.path.endswith('/restaurants'):
-                print 'gotto correct post'
+            path_parts = self.path.split('?')
+            url_path = path_parts[0]
+            variables = path_parts[1] if len(path_parts) > 1 else None
+            var_map = parse_qs(variables) if variables is not None else dict()
+            
+            if url_path.startswith('/restaurants') and url_path.endswith('/edit'):
+                ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+                if ctype == 'multipart/form-data':
+                    fields=cgi.parse_multipart(self.rfile, pdict)
+                    new_name = fields.get('new_name')
+                    r_id = url_path.split('/')[2]
+                    r = session.query(Restaurant).filter(Restaurant.id==r_id).first()
+                    r.name = new_name[0]
+                    session.commit()
+                    self.send_response(301)
+                    self.send_header('Location', '/restaurants')
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                else:
+                    raise ValueError("Invalid restaurant name.")
+            elif self.path.endswith('/restaurants'):
                 self.send_response(301)
                 self.end_headers()
                 ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
@@ -130,16 +151,6 @@ class WebserverHandler(BaseHTTPRequestHandler):
                     content =  "Bad request<br /><br />"
                 restaurants = session.query(Restaurant).all()
                 self.wfile.write(restaurantTemplate.render(restaurants=restaurants, content=content))
-            elif self.path.endswith('/restaurants/assign_new_name'):
-                self.send_response(301)
-                self.end_headers()
-                ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
-                if ctype == 'multipart/form-data':
-                    fields=cgi.parse_multipart(self.rfile, pdict)
-                    new_name = fields.get('new_name')
-                else:
-                    new_name = "None"
-                self.wfile.write(restaurantEditTemplate.render(url=force_url, link_message="You used the force Rae!! :D", message=messagecontent))
             else:
                 self.send_response(301)
                 self.end_headers()
