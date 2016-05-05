@@ -1,0 +1,22 @@
+<html>
+<head>
+<title>Restaurant Management</title>
+<link href="{{url_for('static', filename='styles.css')}}" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div class='pane'>
+    <div class='header'>Restaurant Management</div>
+    {% with messages = get_flashed_messages() %}
+    {% for m in messages %}
+    {% if messages %}
+        <div style="color:green;">
+           {{ m }}
+        </div>
+    {% endif %}
+    {% endfor %}
+    {% endwith %}
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>

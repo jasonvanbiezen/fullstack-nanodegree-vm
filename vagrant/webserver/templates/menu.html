@@ -1,0 +1,11 @@
+{% extends "restaurant.html" %}
+{% block content %}
+<h4><a href="{{ url_for('newMenuItem', restaurant_id = restaurant.id) }}">New Menu Item</a><br /></h4>
+<br /><br />
+{% for i in items %}
+    {{i.name}} <br /> {{i.price}} <br /> {{ i.description }} <br />
+    <a href="{{ url_for('editMenuItem', restaurant_id = restaurant.id, menu_id = i.id) }}">Edit</a><br />
+    <a href="{{ url_for('deleteMenuItem', restaurant_id = restaurant.id, menu_id = i.id) }}">Delete</a><br />
+    <br /><br />
+{% endfor %}
+{% endblock %}

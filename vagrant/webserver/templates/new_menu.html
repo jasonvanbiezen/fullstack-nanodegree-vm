@@ -1,0 +1,20 @@
+{% extends "restaurant.html" %}
+{% block content %}
+<h3>Create a new menu item for <b>{{restaurant.name}}</b></h3>
+<form method='POST' enctype='multipart/form-data' action='{{action_url}}'>
+<table>
+<tr><td>New Menu Item Name: </td><td><input name='name' type='text' value='{{default_name}}'><br /></td></tr>
+<tr><td>New Menu Item Price: </td><td><input name='price' type='text' value='{{default_price}}'><br /></td></tr>
+<tr><td valign='top'>New Menu Item Description: </td><td><textarea name='description' type='text' rows='4' cols='80'>{{default_description}}</textarea><br /></td></tr>
+</table>
+<input type='submit' value='Confirm'>
+</form>
+<h3>Existing items:</h3>
+{% for i in items %}
+    {{i.name}} <br /> {{i.price}} <br /> {{ i.description }} <br />
+    <a href="{{ url_for('editMenuItem', restaurant_id = restaurant.id, menu_id = i.id) }}">Edit</a><br />
+    <a href="{{ url_for('deleteMenuItem', restaurant_id = restaurant.id, menu_id = i.id) }}">Delete</a><br />
+    <br /><br />
+{% endfor %}
+<br /><br />
+{% endblock %}
