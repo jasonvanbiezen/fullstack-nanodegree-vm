@@ -1,4 +1,9 @@
 *.swp
 *_secrets.json
 *.pyc
+*.png
+*.pdf
+*.jpg
+*.jpeg
+*.gif
 
