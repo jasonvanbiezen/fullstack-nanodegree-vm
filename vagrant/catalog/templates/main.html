@@ -18,6 +18,14 @@
     {% endblock %}
     </head>
     <body>
+    {% block content %}
+    {% endblock %}
+
+    <hr>
+    <footer>
+        <div style="text-align:center;width:400px;margin:0 auto;">&copy; Jason van Biezen</div>
+    </footer>
+    <br><br>
         <script>
           window.fbAsyncInit = function() {
             FB.init({
@@ -35,8 +43,35 @@
              fjs.parentNode.insertBefore(js, fjs);
            }(document, 'script', 'facebook-jssdk'));
         </script>
-    {% block content %}
-    {% endblock %}
+
+        <script>
+            function getWindowSize() {
+              var myWidth = 0, myHeight = 0;
+              if( typeof( window.innerWidth ) == 'number' ) {
+                //Non-IE
+                myWidth = window.innerWidth;
+                myHeight = window.innerHeight;
+              } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+                //IE 6+ in 'standards compliant mode'
+                myWidth = document.documentElement.clientWidth;
+                myHeight = document.documentElement.clientHeight;
+              } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+                //IE 4 compatible
+                myWidth = document.body.clientWidth;
+                myHeight = document.body.clientHeight;
+              }
+              return [myWidth, myHeight];
+            }
+            function setHeaderToFullWidth(elementId) {
+                setHeaderToFullWidth(elementId, 0.1);
+            }
+            function setHeaderToFullWidth(elementId, heightRatio) {
+                var windowSize = getWindowSize();
+                document.getElementById(elementId).style.width = "100%";
+                document.getElementById(elementId).style.height = (windowSize[0] * heightRatio).toString() + "px";
+            }
+        </script>
+
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->

@@ -4,14 +4,13 @@
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"><a class="navbar-brand" href="{{url_for('show_catalogs')}}">Item Catalog</a></span>
       {% if 'user_id' in session %}
-        <span class="icon-bar"><a href="{{url_for('login')}}">Login</a></span>
         <span class="icon-bar"><a href="{{url_for('disconnect')}}">Logout</a></span>
+        <span class="icon-bar"><a href="{{url_for('user_catalogs')}}">My Catalogs</a></span>
       {% else %}
         <span class="icon-bar"><a href="{{url_for('login')}}">Login</a></span>
-        <span class="icon-bar"><a href="{{url_for('disconnect')}}">Logout</a></span>
       {% endif %}
-        <span class="icon-bar"><a class="navbar-brand" href="{{url_for('show_catalogs')}}">Item Catalog</a></span>
       </button>
       <a class="navbar-brand" href="{{url_for('show_catalogs')}}">Item Catalog</a><!-- Branding -->
     </div>
@@ -20,6 +19,8 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li><a href="{{url_for('show_catalogs')}}">View Catalogs</a></li>
+        <li roll="presentation" {% if 'user_id' in session %}class="enabled"{% else %}class="disabled"{% endif %}><a href="{{url_for('user_catalogs')}}">My Catalogs</a></li>
+        <li><a href="{{url_for('create_catalog')}}">Create new Catalog</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -40,4 +41,4 @@
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
-
+{% include "flash_messages.html" %}

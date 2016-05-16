@@ -5,7 +5,8 @@
 # is useful to you, or if you reuse my code, please give me credit
 # in your readme.  
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Float, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, Boolean, Text
+from sqlalchemy.dialects.sqlite import BLOB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
@@ -36,6 +37,12 @@ class User(Base):
            'picture'      : self.picture,
        }
 
+class Image(Base):
+    __tablename__ = "image"
+
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(250), nullable=False)
+
 class Catalog(Base):
     __tablename__ = "catalog"
 
@@ -44,27 +51,30 @@ class Catalog(Base):
     public = Column(Boolean)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+    header_image = Column(String(250))
 
 class Catagory(Base):
     __tablename__ = "catagory"
     
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    description = Column(String(250))
+    description = Column(Text, default='')
     catalog_id = Column(Integer, ForeignKey('catalog.id'))
     catalog = relationship(Catalog)
+    catagory_image = Column(String(250))
 
 class Item(Base):
     __tablename__ = "item"
     
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    description = Column(String(250), default='')
+    description = Column(Text, default='')
     quantity = Column(Integer, default=0)
     price = Column(Float(precision=2), default=0.0)
     row = Column(Integer)
     bin = Column(Integer)
     catagory_id = Column(Integer, ForeignKey('catagory.id'))
     catagory = relationship(Catagory)
+    item_image = Column(String(250))
 
 

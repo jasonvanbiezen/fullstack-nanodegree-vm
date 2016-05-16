@@ -1,15 +1,20 @@
 {% extends "main.html" %}
-{% include "header.html" %}
 
 {% block content %}
-<div
-  class="fb-like"
-  data-share="true"
-  data-width="450"
-  data-show-faces="true">
-</div>
+{% include "header.html" %}
 
-main
+<div class="jumbotron">
+    <h1>Item Catalog Database</h1>
+</div>
+{% include "facebook_like_button.html" %}
+
+{% if catalogs %}
+{% for catalog in catalogs %}
+    <a href="{{url_for('show_catagories', catalog_id=catalog.id)}}">
+        {% include "catalog_header.html" %}
+    </a>
+{% endfor %}
+{% endif %}
 
 {% endblock %} 
 
