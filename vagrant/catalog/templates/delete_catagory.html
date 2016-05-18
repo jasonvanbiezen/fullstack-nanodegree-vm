@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% include "header.html" %}
+{% include "catalog_header.html" %}
+<div class="jumbotron">
+    <h1>Delete Catagory: {{catagory.name}}</h1>
+</div>
+
+Are you sure you want to delete this catagory?<br>
+<form method="post" enctype="multipart/form-data" action="{{url_for('delete_catagory', catagory_id=catagory.id)}}">
+    <button type="submit" class="btn btn-success">Delete</button>
+</form>
+
+<br>
+<h3><a href="{{url_for('show_items', catagory_id=catagory.id)}}">Cancel</a></h3>
+
+{% endblock %}
+

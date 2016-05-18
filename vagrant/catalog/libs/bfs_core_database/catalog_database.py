@@ -77,4 +77,3 @@ class Item(Base):
     catagory = relationship(Catagory)
     item_image = Column(String(250))
 
-

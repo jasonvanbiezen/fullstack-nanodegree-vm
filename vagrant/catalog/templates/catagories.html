@@ -4,8 +4,10 @@
 {% include "header.html" %}
 {% include "catalog_header.html" %}
 <div style="width:400px;margin:0 auto;">
+    {% if catalog.user_id == session.get('user_id') %}
     <a href="{{url_for('create_catagory', catalog_id=catalog.id)}}"><button>Create new Catagory</button></a> &nbsp; &nbsp; 
     <a href="{{url_for('delete_catalog', catalog_id=catalog.id)}}"><button>Delete Catalog</button></a>
+    {% endif %}
 </div>
 <br>
 <hr>
@@ -14,9 +16,9 @@
 <tr>
 {% if len(catagories) %}
 <td style="width:33%;text-align:center;">
-    <a href="#">
+    <a href="{{url_for('show_items',catagory_id=catagories[0].id)}}">
         {% if catagories[0].catagory_image %}
-        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[0].catagory_image)}});background-size:100%;">
+        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[0].catagory_image)}});background-size:100%;background-repeat:no-repeat;">
         </div>
         {% else %}
         <div style="width:300px;height:300px;background-color:#dddddd;">
@@ -33,7 +35,7 @@
 <td style="width:33%;text-align:center;">
     <a href="#">
         {% if catagories[1].catagory_image %}
-        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[1].catagory_image)}});background-size:100%;">
+        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[1].catagory_image)}});background-size:100%;background-repeat:no-repeat;">
         </div>
         {% else %}
         <div style="width:300px;height:300px;background-color:#dddddd;">
@@ -51,7 +53,7 @@
 <td style="width:33%;text-align:center;">
     <a href="#">
         {% if catagories[2].catagory_image %}
-        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[2].catagory_image)}});background-size:100%;">
+        <div style="width:300px;height:300px;background-image:url({{url_for('uploaded_file', filename=catagories[2].catagory_image)}});background-size:100%;background-repeat:no-repeat;">
         </div>
         {% else %}
         <div style="width:300px;height:300px;background-color:#dddddd;">

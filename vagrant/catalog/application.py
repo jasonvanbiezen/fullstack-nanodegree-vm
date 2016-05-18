@@ -53,7 +53,7 @@ CLIENT_ID = json.loads(
 
 #######
 #
-# Oauth DB Interaction
+# Oauth User Account
 #
 
 def createUser(session):
@@ -134,6 +134,75 @@ def save_image(file):
 def remove_file(filename):
     os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     
+def remove_catalog(catalog_id):
+    """ 
+    Removes catalog, and all related catagories and items.
+
+    Keyword arguments:
+    catalog_id -- The row ID of the catalog to be deleted.
+
+    Returns: name of deleted catalog, or None if delete failed.
+    """
+    catalog = db.query(Catalog).filter_by(id = catalog_id).one()
+    if catalog:
+        # First remove catalog catagories, if they exist:
+        catagories = db.query(Catagory)\
+                       .filter_by(catalog_id=catalog.id)\
+                       .all()
+        for catagory in catagories:
+            remove_catagory(catagory.id)
+        name = catalog.name
+        header_image = catalog.header_image
+        db.query(Catalog).filter_by(id = catalog_id).delete()
+        db.commit()
+        if header_image:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],header_image))
+        return name
+    return None
+
+def remove_catagory(catagory_id):
+    """ 
+    Removes catagory, and all catagory items.
+
+    Keyword arguments:
+    catagory_id -- The row ID of the catagory to be deleted.
+    
+    Returns: name of deleted catagory, or None if delete failed.
+    """
+    catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+    if catagory:
+        # First remove all items associated with this catagory
+        items = db.query(Item).filter_by(catagory_id=catagory_id).all()
+        for item in items:
+            remove_item(item.id)
+        name = catagory.name
+        catagory_image = catagory.catagory_image
+        db.query(Catagory).filter_by(id=catagory_id).delete()
+        db.commit()
+        if catagory_image:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
+        return name
+    return None
+
+def remove_item(item_id):
+    """ 
+    Removes item indicated by its row ID.
+
+    Keyword arguments:
+    item_id -- The row ID of the item to be deleted.
+
+    Returns: name of deleted item, or None if delete failed.
+    """
+    item = db.query(Item).filter_by(id=item_id).one()
+    if item:
+        name = item.name
+        item_image = item.item_image
+        db.query(Item).filter_by(id=item_id).delete()
+        db.commit()
+        if item_image:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
+        return name
+    return None
 
 #
 #######
@@ -244,13 +313,14 @@ def gconnect():
         user_id = createUser(session)
     session['user_id'] = user_id
 
-    output = ''
+    output = '<div style="width:500px;margin:0 auto;">'
     output += '<h1>Welcome, '
     output += session['username']
     output += '!</h1>'
     output += '<img src="'
     output += session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "margin:0 auto;width: 300px;height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += "</div>"
     flash("You are now logged in with Google+ as %s" % session['username'], 'success')
     return output
 
@@ -307,14 +377,15 @@ def fbconnect():
         user_id = createUser(session)
     session['user_id'] = user_id
 
-    output = ''
+    output = '<div style="width:500px;margin:0 auto;">'
     output += '<h1>Welcome, '
     output += session['username']
 
     output += '!</h1>'
     output += '<img src="'
     output += session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "margin:0 auto;width: 300px; height: 300px;"> '
+    output += '</div>'
 
     flash("You are now logged in with facebook as %s" % session['username'], 'success')
     return output
@@ -473,21 +544,17 @@ def delete_catalog(catalog_id):
             return render_template('delete_catalog.html',
                                    catalog=catalog)
     elif request.method == 'POST':
-        catalog = db.query(Catalog).filter_by(id = catalog_id).one()
-        if catalog:
-            name = catalog.name
-            header_image = catalog.header_image
-            db.query(Catalog).filter_by(id = catalog_id).delete()
-            db.commit()
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],header_image))
+        name = remove_catalog(catalog_id)
+        if name:
             flash("Catalog " + name + " deleted.", 'success')
             return redirect(url_for('show_catalogs'))
         else:
-            flash("Cannot delete catalog: does not exist", 'error')
+            flash("Error: could not delete catalog.", 'error')
             return redirect(url_for('show_catalogs'))
 
 
-@app.route('/catalog/<int:catalog_id>/catagories/create/', methods=['GET', 'POST'])
+@app.route('/catalog/<int:catalog_id>/catagories/create/',
+           methods=['GET', 'POST'])
 @login_required
 def create_catagory(catalog_id):
     if request.method == 'GET':
@@ -519,8 +586,8 @@ def create_catagory(catalog_id):
                             .first()
                 existing_catagory = db.query(Catagory)\
                                       .filter(
-                                          and_(Catagory.name==name,
-                                               Catagory.catalog_id==catalog_id))\
+                                        and_(Catagory.name==name,
+                                             Catagory.catalog_id==catalog_id))\
                                       .first()
                 if existing_catagory:
                     flash('Catagory cannot have the same name as an existing'+
@@ -538,7 +605,8 @@ def create_catagory(catalog_id):
                 new_catagory = Catagory(name=name,
                                         description=description,
                                         catalog_id=catalog_id,
-                                        catagory_image=image.filename)
+                                        catagory_image=image.filename \
+                                                       if image else None)
                 db.add(new_catagory)
                 db.commit()
                 flash('New catagory ' + name + 
@@ -556,13 +624,73 @@ def create_catagory(catalog_id):
                   'error')
             return redirect(url_for('show_catalogs'))
 
+@app.route('/catagory/<int:catagory_id>/')
+@app.route('/catagory/<int:catagory_id>/items/')
+def show_items(catagory_id):
+    catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+    if catagory:
+        catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).one()
+        return render_template("items.html",
+                               catalog=catalog,
+                               catagory=catagory)
+    else:
+        flash('That catagory does not exist.', 'error')
+        return redirect(url_for('show_catagories',catalog_id=catalog_id))
+
+@app.route('/catagory/<int:catagory_id>/item/create/', methods=['GET','POST'])
+def create_item(catagory_id):
+    return "return item page"
+
+@app.route('/catagory/<int:catagory_id>/delete/', methods=['GET','POST'])
+@login_required
+def delete_catagory(catagory_id):
+    if request.method == 'GET':
+        catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+        if catagory:
+            catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).one()
+            if session['user_id'] != catalog.user_id:
+                flash('You must be the owner of the catalog to modify it.',
+                      'error')
+                return redirect(url_for('show_catalogs'))
+            else:
+                return render_template('delete_catagory.html',
+                                       catalog=catalog,
+                                       catagory=catagory)
+        else:
+            flash('Catagory does not exist', 'error')
+            return redirect(url_for('show_catalogs'))
+    elif request.method == 'POST':
+        catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+        if catagory:
+            catalog_id = catagory.catalog_id
+            catalog = db.query(Catalog).filter_by(id=catalog_id).one()
+            if session['user_id'] == catalog.user_id:
+                name = remove_catagory(catagory_id)
+                if name:
+                    flash('Catagory %s successfully removed.' % name, 'success')
+                else:
+                    flash('Catagory %s could not be removed.' % name, 'error')
+                return redirect(url_for('show_catagories',
+                                catalog_id=catalog_id))
+            else:
+                flash('You must be the owner of the catalog to modify it.',
+                      'error')
+                return redirect(url_for('show_catalogs'))
+        else:
+            flash('Catagory does not exist', 'error')
+            return redirect(url_for('show_catalogs'))
+
+@app.route('/item/<int:item_id>/delete/', methods=['GET','POST'])
+def delete_item(item_id):
+    return "delete item page"
+
 @app.context_processor
 def site_utility_methods():
     def get_year():
         return datetime.datetime.now().year
+
     def get_catagory_rows(catalog_id):
         if catalog_id is None:
-            print 'returning none'
             return []
         catagories = db.query(Catagory)\
                        .filter_by(catalog_id=int(catalog_id))\
@@ -574,12 +702,26 @@ def site_utility_methods():
             if len(row) == 3:
                 ret.append(row)
                 row = []
-        print 'returning: %d' % (len(ret))
         if len(row) != 0:
             ret.append(row)
         return ret
+
+    def get_item_rows(catagory_id):
+        items = db.query(Item).filter_by(catagory_id=int(catagory_id)).all()
+        row = []
+        ret = []
+        for item in items:
+            row.append(item)
+            if len(row) == 3:
+                ret.append(row)
+                row = []
+        if len(row) != 0:
+            ret.append(row)
+        return ret
+
     return dict(get_year=get_year,
                 get_catagory_rows=get_catagory_rows,
+                get_item_rows=get_item_rows,
                 len=len
                )
 
