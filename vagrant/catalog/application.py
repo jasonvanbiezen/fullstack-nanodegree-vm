@@ -154,6 +154,7 @@ def remove_catalog(catalog_id):
         name = catalog.name
         header_image = catalog.header_image
         db.query(Catalog).filter_by(id = catalog_id).delete()
+        db.query(Catalog).filter_by(filename=header_image).delete()
         db.commit()
         if header_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],header_image))
@@ -178,6 +179,7 @@ def remove_catagory(catagory_id):
         name = catagory.name
         catagory_image = catagory.catagory_image
         db.query(Catagory).filter_by(id=catagory_id).delete()
+        db.query(Catalog).filter_by(filename=catagory_image).delete()
         db.commit()
         if catagory_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
@@ -198,6 +200,7 @@ def remove_item(item_id):
         name = item.name
         item_image = item.item_image
         db.query(Item).filter_by(id=item_id).delete()
+        db.query(Catalog).filter_by(filename=catagory_image).delete()
         db.commit()
         if item_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
@@ -247,8 +250,8 @@ def gconnect():
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
     # If there was an error in the access token info, abort.
-    if result.get('error') is not None:
-        response = make_response(json.dumps(result.get('error')), 500)
+    if result.get('danger') is not None:
+        response = make_response(json.dumps(result.get('danger')), 500)
         response.headers['Content-Type'] = 'application/json'
 
     # Verify that the access token is used for the intended user.
@@ -494,13 +497,13 @@ def create_catalog():
        name = request.form.get('name')
        public = True if request.form.get('public') else False 
        if not name or len(name) < 3:
-           flash("Invalid name!", "error")
+           flash("Invalid name!", 'danger')
            return render_template('create_catalog.html',
                                   name=name,
                                   public=public)
        existing_catalog = db.query(Catalog).filter_by(name=name).first()
        if existing_catalog:
-           flash("A catalog with that name already exists!", "error")
+           flash("A catalog with that name already exists!", 'danger')
            return render_template('create_catalog.html',
                                   name=name,
                                   public=public)
@@ -538,7 +541,7 @@ def delete_catalog(catalog_id):
     if request.method == 'GET':
         catalog = db.query(Catalog).filter_by(id = catalog_id).one()
         if not catalog:
-            flash("Cannot delete catalog: does not exist", 'error')
+            flash("Cannot delete catalog: does not exist", 'danger')
             return redirect(url_for('catalogs'))
         else:
             return render_template('delete_catalog.html',
@@ -549,7 +552,7 @@ def delete_catalog(catalog_id):
             flash("Catalog " + name + " deleted.", 'success')
             return redirect(url_for('show_catalogs'))
         else:
-            flash("Error: could not delete catalog.", 'error')
+            flash("Error: could not delete catalog.", 'danger')
             return redirect(url_for('show_catalogs'))
 
 
@@ -569,11 +572,11 @@ def create_catagory(catalog_id):
             if catalog:
                 flash('You must be the owner of a catalog to'+
                       ' create new catagories.',
-                      'error')
+                      'danger')
                 return redirect(url_for('show_catagories',
                                         catalog_id=catalog_id))
             else:
-                flash('The indicated catagory does not exist.', 'error')
+                flash('The indicated catagory does not exist.', 'danger')
                 return redirect(url_for('show_catalogs'))
     elif request.method == 'POST':
         catalog = db.query(Catalog).filter_by(id = catalog_id).first()
@@ -591,7 +594,7 @@ def create_catagory(catalog_id):
                                       .first()
                 if existing_catagory:
                     flash('Catagory cannot have the same name as an existing'+
-                          ' catagory.', 'error')
+                          ' catagory.', 'danger')
                     return redirect(url_for('create_catagory',
                                             catalog_id=catalog_id,
                                             name=name,
@@ -614,14 +617,14 @@ def create_catagory(catalog_id):
                 return redirect(url_for('show_catagories',
                                         catalog_id=catalog_id))
             else:
-                flash('A valid name is required.', 'error')
+                flash('A valid name is required.', 'danger')
                 return redirect(url_for('create_catagory',
                                         catalog_id=catalog_id,
                                         name=name,
                                         description=description)) 
         else:
             flash('Catalog not found.  Cannot create new catagory.',
-                  'error')
+                  'danger')
             return redirect(url_for('show_catalogs'))
 
 @app.route('/catagory/<int:catagory_id>/')
@@ -634,7 +637,7 @@ def show_items(catagory_id):
                                catalog=catalog,
                                catagory=catagory)
     else:
-        flash('That catagory does not exist.', 'error')
+        flash('That catagory does not exist.', 'danger')
         return redirect(url_for('show_catagories',catalog_id=catalog_id))
 
 @app.route('/catagory/<int:catagory_id>/item/create/', methods=['GET','POST'])
@@ -650,14 +653,14 @@ def delete_catagory(catagory_id):
             catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).one()
             if session['user_id'] != catalog.user_id:
                 flash('You must be the owner of the catalog to modify it.',
-                      'error')
+                      'danger')
                 return redirect(url_for('show_catalogs'))
             else:
                 return render_template('delete_catagory.html',
                                        catalog=catalog,
                                        catagory=catagory)
         else:
-            flash('Catagory does not exist', 'error')
+            flash('Catagory does not exist', 'danger')
             return redirect(url_for('show_catalogs'))
     elif request.method == 'POST':
         catagory = db.query(Catagory).filter_by(id=catagory_id).one()
@@ -669,15 +672,15 @@ def delete_catagory(catagory_id):
                 if name:
                     flash('Catagory %s successfully removed.' % name, 'success')
                 else:
-                    flash('Catagory %s could not be removed.' % name, 'error')
+                    flash('Catagory %s could not be removed.' % name, 'danger')
                 return redirect(url_for('show_catagories',
                                 catalog_id=catalog_id))
             else:
                 flash('You must be the owner of the catalog to modify it.',
-                      'error')
+                      'danger')
                 return redirect(url_for('show_catalogs'))
         else:
-            flash('Catagory does not exist', 'error')
+            flash('Catagory does not exist', 'danger')
             return redirect(url_for('show_catalogs'))
 
 @app.route('/item/<int:item_id>/delete/', methods=['GET','POST'])
