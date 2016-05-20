@@ -62,21 +62,21 @@ def createUser(session):
                    picture = session['picture'])
     db.add(newUser)
     db.commit()
-    user = db.query(User).filter(User.email == session['email']).one()
+    user = db.query(User).filter(User.email == session['email']).first()
     return user.id
 
 def getUserInfo(user_id):
-    user = db.query(User).filter(User.id == user_id).one()
+    user = db.query(User).filter(User.id == user_id).first()
     return user
 
 def getUserID(email):
     try:
-        user = db.query(User).filter(User.email == email).one()
+        user = db.query(User).filter(User.email == email).first()
         return user.id
     except:
         return None
 
-def login_required(f):
+def requires_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -143,7 +143,7 @@ def remove_catalog(catalog_id):
 
     Returns: name of deleted catalog, or None if delete failed.
     """
-    catalog = db.query(Catalog).filter_by(id = catalog_id).one()
+    catalog = db.query(Catalog).filter_by(id = catalog_id).first()
     if catalog:
         # First remove catalog catagories, if they exist:
         catagories = db.query(Catagory)\
@@ -154,7 +154,7 @@ def remove_catalog(catalog_id):
         name = catalog.name
         header_image = catalog.header_image
         db.query(Catalog).filter_by(id = catalog_id).delete()
-        db.query(Catalog).filter_by(filename=header_image).delete()
+        db.query(Image).filter_by(filename=header_image).delete()
         db.commit()
         if header_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],header_image))
@@ -170,7 +170,7 @@ def remove_catagory(catagory_id):
     
     Returns: name of deleted catagory, or None if delete failed.
     """
-    catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+    catagory = db.query(Catagory).filter_by(id=catagory_id).first()
     if catagory:
         # First remove all items associated with this catagory
         items = db.query(Item).filter_by(catagory_id=catagory_id).all()
@@ -179,7 +179,7 @@ def remove_catagory(catagory_id):
         name = catagory.name
         catagory_image = catagory.catagory_image
         db.query(Catagory).filter_by(id=catagory_id).delete()
-        db.query(Catalog).filter_by(filename=catagory_image).delete()
+        db.query(Image).filter_by(filename=catagory_image).delete()
         db.commit()
         if catagory_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
@@ -195,12 +195,12 @@ def remove_item(item_id):
 
     Returns: name of deleted item, or None if delete failed.
     """
-    item = db.query(Item).filter_by(id=item_id).one()
+    item = db.query(Item).filter_by(id=item_id).first()
     if item:
         name = item.name
         item_image = item.item_image
         db.query(Item).filter_by(id=item_id).delete()
-        db.query(Catalog).filter_by(filename=catagory_image).delete()
+        db.query(Image).filter_by(filename=catagory_image).delete()
         db.commit()
         if item_image:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],catagory_image))
@@ -483,13 +483,13 @@ def show_catalogs():
     return render_template('catalogs.html', catalogs=catalogs)
 
 @app.route('/catalogs/user/')
-@login_required
+@requires_login
 def user_catalogs():
     catalogs = db.query(Catalog).filter_by(user_id=session['user_id']).all()
     return render_template('catalogs.html', catalogs=catalogs)
 
 @app.route('/catalogs/create/', methods=['GET','POST'])
-@login_required
+@requires_login
 def create_catalog():
     if request.method == 'GET':
         return render_template('create_catalog.html')
@@ -526,7 +526,7 @@ def create_catalog():
 @app.route('/catalog/<int:catalog_id>/', methods=['GET'])
 @app.route('/catalog/<int:catalog_id>/catagories', methods=['GET'])
 def show_catagories(catalog_id):
-    catalog = db.query(Catalog).filter_by(id = catalog_id).one()
+    catalog = db.query(Catalog).filter_by(id = catalog_id).first()
     if not catalog:
         flash("That catalog does not exist!", 'warning')
         return redirect(url_for('show_catalogs'))
@@ -536,10 +536,10 @@ def show_catagories(catalog_id):
                            catagories=catagories)
 
 @app.route('/catalog/<int:catalog_id>/delete', methods=['GET','POST'])
-@login_required
+@requires_login
 def delete_catalog(catalog_id):
     if request.method == 'GET':
-        catalog = db.query(Catalog).filter_by(id = catalog_id).one()
+        catalog = db.query(Catalog).filter_by(id = catalog_id).first()
         if not catalog:
             flash("Cannot delete catalog: does not exist", 'danger')
             return redirect(url_for('catalogs'))
@@ -558,7 +558,7 @@ def delete_catalog(catalog_id):
 
 @app.route('/catalog/<int:catalog_id>/catagories/create/',
            methods=['GET', 'POST'])
-@login_required
+@requires_login
 def create_catagory(catalog_id):
     if request.method == 'GET':
         catalog = db.query(Catalog).filter_by(id = catalog_id).first()
@@ -630,9 +630,9 @@ def create_catagory(catalog_id):
 @app.route('/catagory/<int:catagory_id>/')
 @app.route('/catagory/<int:catagory_id>/items/')
 def show_items(catagory_id):
-    catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+    catagory = db.query(Catagory).filter_by(id=catagory_id).first()
     if catagory:
-        catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).one()
+        catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).first()
         return render_template("items.html",
                                catalog=catalog,
                                catagory=catagory)
@@ -641,16 +641,108 @@ def show_items(catagory_id):
         return redirect(url_for('show_catagories',catalog_id=catalog_id))
 
 @app.route('/catagory/<int:catagory_id>/item/create/', methods=['GET','POST'])
+@requires_login
 def create_item(catagory_id):
-    return "return item page"
+    if request.method == 'GET':
+        catagory = db.query(Catagory).filter_by(id=catagory_id).first()
+        if not catagory:
+            flash("Cannot create item in catagory that doesn't exist", 'danger')
+            return redirect(url_for('show_catalogs'))
+        catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).first()
+        if not catalog:
+            flash("Cannot create item in catalog that doesn't exist", 'danger')
+            return redirect(url_for('show_catalogs'))
+        if session['user_id'] != catalog.user_id:
+            flash("You must be the owner of a catalog to create items",
+                  'danger')
+            return redirect(url_for('show_catagories', catalog_id=catalog.id))
+        return render_template('create_item.html',
+                               catalog = catalog,
+                               catagory = catagory)
+    elif request.method == 'POST':
+        try:
+            catagory = db.query(Catagory).filter_by(id=catagory_id).first()
+            catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).first()
+        except NoResultsFound, e:
+            flash("Cannot create item in catagory that doesn't exist", 'danger')
+            return redirect(url_for('show_catalogs'))
+        if session['user_id'] != catalog.user_id:
+            flash("You must be the owner of a catalog to create items",
+                  'danger')
+            return redirect(url_for('show_catagories', catalog_id=catalog.id))
+        item_name = request.form.get('item_name')
+        description = request.form.get('description')
+        price = request.form.get('price')
+        row = request.form.get('row')
+        rbin = request.form.get('bin')
+        existing_item = db.query(Item).filter_by(name = item_name,
+                                                 catagory_id = catagory.id)\
+                                      .first()
+        if existing_item:
+            flash("An item with name '%s' already exists in the %s catagory"%\
+                  (item_name, catagory.name), 'danger')
+            return render_template('create_item.html',
+                                   catalog = catalog,
+                                   catagory = catagory,
+                                   item_name = item_name,
+                                   description = description,
+                                   price = price,
+                                   row = row,
+                                   bin = rbin)
+        try:
+            print type(price)
+            # Casted to float separately so that the invalid text value is
+            # repopulated in the form on error.
+            price = float(price)
+        except ValueError:
+            flash('Invalid price', 'danger')
+            return render_template('create_item.html',
+                                   catalog = catalog,
+                                   catagory = catagory,
+                                   item_name = item_name,
+                                   description = description,
+                                   price = price,
+                                   row = row,
+                                   bin = rbin)
+        try:
+            row = int(row)
+            rbin = int(rbin)
+        except ValueError:
+            flash('Row or Bin is not a valid integer number', 'danger')
+            return render_template('create_item.html',
+                                   catalog = catalog,
+                                   catagory = catagory,
+                                   item_name = item_name,
+                                   description = description,
+                                   price = price,
+                                   row = row,
+                                   bin = rbin)
+        file = request.files['image']
+        if file and allowed_image_file(file.filename):
+            image = save_image(file)
+        else:
+            image = None
+        new_item = Item(name = item_name,
+                        description = description,
+                        price = price,
+                        row = row,
+                        bin = rbin,
+                        catagory_id = catagory.id,
+                        item_image = image.filename if image else None)
+        db.add(new_item)
+        db.commit()
+        flash('New item %s added to catagory %s' % \
+              (item_name, catagory.name), 'success')
+        return redirect(url_for('show_items', catagory_id = catagory.id))
 
+        
 @app.route('/catagory/<int:catagory_id>/delete/', methods=['GET','POST'])
-@login_required
+@requires_login
 def delete_catagory(catagory_id):
     if request.method == 'GET':
-        catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+        catagory = db.query(Catagory).filter_by(id=catagory_id).first()
         if catagory:
-            catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).one()
+            catalog = db.query(Catalog).filter_by(id=catagory.catalog_id).first()
             if session['user_id'] != catalog.user_id:
                 flash('You must be the owner of the catalog to modify it.',
                       'danger')
@@ -663,10 +755,10 @@ def delete_catagory(catagory_id):
             flash('Catagory does not exist', 'danger')
             return redirect(url_for('show_catalogs'))
     elif request.method == 'POST':
-        catagory = db.query(Catagory).filter_by(id=catagory_id).one()
+        catagory = db.query(Catagory).filter_by(id=catagory_id).first()
         if catagory:
             catalog_id = catagory.catalog_id
-            catalog = db.query(Catalog).filter_by(id=catalog_id).one()
+            catalog = db.query(Catalog).filter_by(id=catalog_id).first()
             if session['user_id'] == catalog.user_id:
                 name = remove_catagory(catagory_id)
                 if name:
