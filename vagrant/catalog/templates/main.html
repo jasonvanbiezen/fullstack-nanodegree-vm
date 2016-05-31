@@ -9,6 +9,7 @@
         <title>{% block title %}Catalog Item Database{% endblock %}</title>
         <!-- Bootstrap -->
         <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet"> 
+        <link href="{{url_for('static', filename='css/catalog.css')}}" rel="stylesheet"> 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -16,6 +17,44 @@
           <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
     {% endblock %}
+
+
+    <script>
+        function getWindowSize() {
+          var myWidth = 0, myHeight = 0;
+          if( typeof( window.innerWidth ) == 'number' ) {
+            //Non-IE
+            myWidth = window.innerWidth;
+            myHeight = window.innerHeight;
+          } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+            //IE 6+ in 'standards compliant mode'
+            myWidth = document.documentElement.clientWidth;
+            myHeight = document.documentElement.clientHeight;
+          } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+            //IE 4 compatible
+            myWidth = document.body.clientWidth;
+            myHeight = document.body.clientHeight;
+          }
+          return [myWidth, myHeight];
+        }
+        function setElementToFullWidth(elementId) {
+            setHeaderToFullWidth(elementId, 0.20);
+        }
+        function setElementToFullWidth(elementId, heightRatio) {
+            var windowSize = getWindowSize();
+            setElementWidthHeight(elementId, windowSize[0], windowSize[0] * heightRatio);
+        }
+        function setElementWidthHeight(elementId, width, height) {
+            document.getElementById(elementId).style.width = (width).toString() + "px";
+            document.getElementById(elementId).style.height = (height).toString() + "px";
+        }
+        function fadeDivById(id){
+            $(id).fadeOut(3000);
+        }
+        function goBack() {
+            window.history.back()
+        }
+    </script>
     </head>
     <body>
     {% block content %}
@@ -42,34 +81,6 @@
              js.src = "//connect.facebook.net/en_US/sdk.js";
              fjs.parentNode.insertBefore(js, fjs);
            }(document, 'script', 'facebook-jssdk'));
-        </script>
-
-        <script>
-            function getWindowSize() {
-              var myWidth = 0, myHeight = 0;
-              if( typeof( window.innerWidth ) == 'number' ) {
-                //Non-IE
-                myWidth = window.innerWidth;
-                myHeight = window.innerHeight;
-              } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-                //IE 6+ in 'standards compliant mode'
-                myWidth = document.documentElement.clientWidth;
-                myHeight = document.documentElement.clientHeight;
-              } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-                //IE 4 compatible
-                myWidth = document.body.clientWidth;
-                myHeight = document.body.clientHeight;
-              }
-              return [myWidth, myHeight];
-            }
-            function setHeaderToFullWidth(elementId) {
-                setHeaderToFullWidth(elementId, 0.1);
-            }
-            function setHeaderToFullWidth(elementId, heightRatio) {
-                var windowSize = getWindowSize();
-                document.getElementById(elementId).style.width = "100%";
-                document.getElementById(elementId).style.height = (windowSize[0] * heightRatio).toString() + "px";
-            }
         </script>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

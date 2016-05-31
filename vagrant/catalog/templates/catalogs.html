@@ -3,18 +3,25 @@
 {% block content %}
 {% include "header.html" %}
 
-<div class="jumbotron">
+<div class="" style="text-align:center;width:100%;">
     <h1>Item Catalog Database</h1>
 </div>
+<hr>
 {% include "facebook_like_button.html" %}
-
+<div class="" style="text-align:center;width:100%;">
+    <h3>Catalogs:</h3>
+</div>
 {% if catalogs %}
 {% for catalog in catalogs %}
+<div style="width:1000px;margin:0 auto;">
     <a href="{{url_for('show_catagories', catalog_id=catalog.id)}}">
         {% include "catalog_header.html" %}
     </a>
+</div>
+<script>
+setElementWidthHeight('catalog_{{catalog.name}}', 1000, 200);
+</script>
 {% endfor %}
 {% endif %}
-
 {% endblock %} 
 

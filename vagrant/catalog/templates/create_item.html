@@ -4,46 +4,50 @@
 {% include "header.html" %}
 
 {% include "catalog_header.html" %}
+{% include "catagory_header.html" %}
 
-<div class="jumbotron">
-    <table><tr>
-    <td>
-        <div style="width:100px;height:100px;background-image:url({{url_for('uploaded_file', filename=catagory.catagory_image)}});background-size:100%;background-repeat:no-repeat;"></div>
-    </td><td>
-        <h1 style="padding-left:20px;">Create new Item in {{catagory.name}}</h1>
-    </td>
-    </tr></table>
+<div style="text-align:center;">
+{% if item %}
+<h1>Edit item {{item.name}}</h1>
+{% else %}
+<h1>Create new item</h1>
+{% endif %}
 </div>
 
-<div style="margin:0 auto;width:600px;">
-  <form method="post" enctype="multipart/form-data" action="{{url_for('create_item', catagory_id=catagory.id)}}">
+<div class="width-6 center">
+  <form method="post" enctype="multipart/form-data" {% if item %}action="{{url_for('edit_item', item_id=item.id)}}"{% else %}action="{{url_for('create_item', catagory_id=catagory.id)}}"{% endif %}>
     <div class="form-group">
       <label for="item_name" class="col-sm-3 control-label" style="display:inline;">Item Name:</label>
-      <input class="form-control" id="item_name" name="item_name" type="text" style="display:inline;width:400px;" value="{% if item_name %}{{item_name}}{%endif%}">
+      <input class="form-control" id="item_name" name="item_name" type="text" style="display:inline;width:400px;" value="{% if item_name %}{{item_name}}{%elif item%}{{item.name}}{% else %}{%endif%}">
     </div>
     <div class="form-group">
       <label for="description" class="col-sm-3 control-label" style="display:inline;">Description:</label>
-      <textarea class="form-control" id="description" name="description" type="text" rows="10">{% if description %}{{description}}{%else%} {%endif%}</textarea>
+      <textarea class="form-control" id="description" name="description" type="text" rows="10">{% if description %}{{description}}{%elif item%}{{item.description}}{%else%}{%endif%}</textarea>
     </div>
     <div class="form-group">
       <label for="image" class="col-sm-3 control-label">Item Image (300px X 300px):</label>
-      <input id="image" name="image" type="file">
+      {% if item and item.item_image %} <img style="display:inline;width:30px;height:30px;" src="{{url_for('uploaded_file', filename=item.item_image)}}">{% endif %} <input id="image" name="image" type="file" style="display:inline;">
+      {% if item and item.item_image %}<input id="delete_image" name="delete_image" type="checkbox" style="display:inline;"> Delete Image{% endif %}
     </div>
     <br>
     <div class="form-group">
       <label for="price" class="col-sm-3 control-label" style="display:inline;">Price:</label>
-      <input class="form-control" id="price" name="price" type="number" step="0.01" style="display:inline;width:400px;" value="{% if price %}{{price}}{%else%}0.00{%endif%}">
+      <input class="form-control inline width-2" id="price" name="price" type="number" step="0.01" value="{% if price %}{{price}}{%elif item%}{{item.price}}{%else%}0.00{%endif%}">
+    </div>
+    <div class="form-group">
+      <label for="quantity" class="col-sm-3 control-label" style="display:inline;">Quantity:</label>
+      <input class="form-control inline width-2" id="quantity" name="quantity" type="number" step="1" value="{% if quantity %}{{quantity}}{%elif item%}{{item.quantity}}{%else%}0{%endif%}">
     </div>
     <div class="form-group">
       <label for="row" class="col-sm-3 control-label" style="display:inline;">Row:</label>
-      <input class="form-control" id="row" name="row" type="number" step="1" style="display:inline;width:400px;" value="{% if row %}{{row}}{%else%}0{%endif%}">
+      <input class="form-control" id="row" name="row" type="number" step="1" style="display:inline;width:400px;" value="{% if row %}{{row}}{%elif item%}{{item.row}}{%else%}0{%endif%}">
     </div>
     <div class="form-group">
-      <label for="bin" class="col-sm-3 control-label" style="display:inline;">Row:</label>
-      <input class="form-control" id="bin" name="bin" type="number" step="1" style="display:inline;width:400px;" value="{% if bin %}{{bin}}{%else%}0{%endif%}">
+      <label for="bin" class="col-sm-3 control-label" style="display:inline;">bin:</label>
+      <input class="form-control" id="bin" name="bin" type="number" step="1" style="display:inline;width:400px;" value="{% if bin %}{{bin}}{%elif item%}{{item.bin}}{%else%}0{%endif%}">
     </div>
     <div class="form-group">
-      <input type="submit" value="Create">
+      <input type="submit" value={% if item %}"Update"{% else %}"Create"{% endif %}>
     </div>
   </form>
 </div>

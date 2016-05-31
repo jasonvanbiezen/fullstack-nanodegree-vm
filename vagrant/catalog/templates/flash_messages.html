@@ -1,23 +1,19 @@
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages and len(messages)%}
-  <div style="position:absolute;width:800px;top:90px;left:0px;" id="flashes">
+  <div class="flash-messages" id="flash-messages">
     <ul class=flashes style="list-style-type:none;">
     {% for category, message in messages %}
       <li class="alert alert-{{ category }}">{{ message }}</li>
     {% endfor %}
     </ul>
     <div style="position:absolute;top:5px;right:5px;">
-        <button onclick="fadeDivById('#flashes');">X</button>
+        <button onclick="fadeDivById('#flash-messages');">X</button>
     </div>
   </div>
-<script>
-function fadeDivById(id){
-    $(id).fadeOut(3000);
-}
-</script>
-<script>
-setTimeout(function(){fadeDivById("#flashes");}, 5000);
-</script>
+  <script>
+    setTimeout(function(){fadeDivById("#flash-messages");}, 5000);
+  </script>
   {% endif %}
 {% endwith %}
+

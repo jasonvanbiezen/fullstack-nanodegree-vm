@@ -1,6 +1,8 @@
-<div class="jumbotron" style="{% if catalog.header_image %}background-image:url({{url_for('uploaded_file', filename=catalog.header_image)}});{% endif %}background-size:100%;background-repeat:no-repeat;width:100%;">
-    <h1>{% if catalog %}<div style="color:white;text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;">Catalog: {{catalog.name}}</div>{% endif %}</h1>
-    <div style="padding-left:30px;color:white;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">{% if catalog.public %} Public {% else %} Private {% endif %} Catalog 
+<a href="{{url_for('show_catagories', catalog_id=catalog.id)}}" class="no-link-decorations">
+<div class="jumbotron full-width" style="{% if catalog.header_image %}background-image:url({{url_for('uploaded_file', filename=catalog.header_image)}});{% endif %}" id="catalog_{{catalog.name}}">
+    <h1>{% if catalog %}<div class="catalog-header">Catalog: {{catalog.name}}</div>{% endif %}</h1>
+    <div class="catalog-header">{% if catalog.public %} Public {% else %} Private {% endif %} Catalog 
     {% if catalog.user_id == session.get('user_id') %} | Owned by you {% endif %}</div>
     </div>
 </div>
+</a>

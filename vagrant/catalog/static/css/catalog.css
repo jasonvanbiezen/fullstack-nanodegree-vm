@@ -1,0 +1,89 @@
+.catalog-header {
+    color:white;
+    text-decoration:none;
+    text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+}
+
+.full-width {
+    background-size:100%;
+    background-repeat:no-repeat;
+    width:100%;
+}
+
+.flash-messages {
+    position:absolute;
+    width:400px;
+    top:90px;
+    right:30px;
+}
+
+.width-1 {
+    width: 100px;
+}
+.width-2 {
+    width: 200px;
+}
+.width-3 {
+    width: 300px;
+}
+.width-4 {
+    width: 400px;
+}
+.width-6 {
+    width: 600px;
+}
+
+.height-3 {
+    height:300px;
+}
+
+.div-image {
+    background-size:100%;
+    background-repeat:no-repeat;
+}
+
+.inline {
+    display: inline;
+}
+.center {
+    margin: 0 auto;
+}
+
+a.no-link-decorations {
+    text-decoration:none;
+}
+a.no-link-decorations.link {
+    text-decoration:none;
+}
+a.no-link-decorations.visited {
+    text-decoration:none;
+}
+a.no-link-decorations.hover {
+    text-decoration:none;
+}
+a.no-link-decorations.active {
+    text-decoration:none;
+}
+
+img.provider-google {
+    width:32px;
+    height:32px;
+    border-radius:16px;
+    -webkit-border-radius:16px;
+    -moz-border-radius:16px;
+}
+img.provider-linkedin {
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    -webkit-border-radius:8px;
+    -moz-border-radius:8px;
+}
+img.provider-facebook {
+    width:32px;
+    height:32px;
+}
+img.provider-other {
+    width:32px;
+    height:32px;
+}

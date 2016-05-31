@@ -2,29 +2,31 @@
 
 {% block content %}
 {% include "header.html" %}
-
 {% include "catalog_header.html" %}
 
-<div class="jumbotron">
+<div class="width-4 center">
     <h1>Create new Catagory</h1>
 </div>
 
-<div style="margin:0 auto;width:600px;">
+<div class="width-6 center">
   <form method="post" enctype="multipart/form-data" action="{{url_for('create_catagory', catalog_id=catalog.id)}}">
     <div class="form-group">
       <label for="name" class="col-sm-3 control-label" style="display:inline;">Catagory Name:</label>
-      <input class="form-control" id="name" name="name" type="text" style="display:inline;width:400px;" value="{% if name %}{{name}}{%endif%}">
+      <input class="form-control" id="name" name="name" type="text" style="display:inline;" class="width-4" value="{% if name %}{{name}}{%endif%}">
     </div>
     <div class="form-group">
       <label for="description" class="col-sm-3 control-label" style="display:inline;">Description:</label>
       <textarea class="form-control" id="description" name="description" type="text" rows="10">{% if description %}{{description}}{%else%} {%endif%}</textarea>
     </div>
     <div class="form-group">
-      <label for="image" class="col-sm-3 control-label">Catagory Image:</label>
+      <label for="image" class="col-sm-3 control-label">Catagory Image: (300px X 300px)</label>
       <input id="image" name="image" type="file">
     </div>
-    <div class="form-group">
+    <br>
+    <div class="form-group" class="width-1 center">
+      <h3>
       <input type="submit" value="Create">
+      </h3>
     </div>
   </form>
 </div>

@@ -1,0 +1,14 @@
+<a href="{{url_for('show_items', catagory_id=catagory.id)}}" class="no-link-decorations">
+<table><tr>
+<td>
+    {% if catagory.catagory_image %}
+    <div style="border:1px solid black;width:100px;height:100px;background-image:url({{url_for('uploaded_file', filename=catagory.catagory_image)}});background-size:100%;background-repeat:no-repeat;"></div>
+    {% else %}
+    <div style="border:1px solid black;width:100px;height:100px;background-color:#DDDDDD;background-size:100%;background-repeat:no-repeat;">{{catagory.name}}</div>
+    {% endif %}
+</td><td>
+    <h1 style="padding-left:20px;">Catagory: {{catagory.name}}</h1>
+</td>
+</tr></table>
+</a>
+
