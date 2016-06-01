@@ -4,17 +4,17 @@
 {% include "header.html" %}
 
 {% include "catalog_header.html" %}
-{% include "catagory_header.html" %}
+{% include "category_header.html" %}
 
 <h3>
 <!--<button onclick="goBack();">Back</button>-->
-<a href="{{url_for('show_items', catagory_id=item.catagory_id)}}"><button>Back</button></a>
+<a href="{{url_for('show_items', category_id=item.category_id)}}"><button>Back</button></a>
 </h3>
-<div class="width-6 center">
+<div class="width-3 center">
     <table style="border:0;"><tr>
         <th colspan="2">
           {% if item.item_image %}
-            <div class="width-3 height-3 div-image center" style="background-image:url({{url_for('uploaded_file', filename=item.item_image)}});"></div>
+            <img class="width-3 center" src="{{url_for('uploaded_file', filename=item.item_image)}}"><br>
           {% else %}
             <div class="width-3 height-3" style="background-color: #dddddd;"></div>
           {% endif %}

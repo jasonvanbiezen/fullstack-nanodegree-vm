@@ -53,15 +53,15 @@ class Catalog(Base):
     user = relationship(User)
     header_image = Column(String(250))
 
-class Catagory(Base):
-    __tablename__ = "catagory"
+class Category(Base):
+    __tablename__ = "category"
     
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     description = Column(Text, default='')
     catalog_id = Column(Integer, ForeignKey('catalog.id'))
     catalog = relationship(Catalog)
-    catagory_image = Column(String(250))
+    category_image = Column(String(250))
 
 class Item(Base):
     __tablename__ = "item"
@@ -73,7 +73,7 @@ class Item(Base):
     price = Column(Float(precision=2), default=0.0)
     row = Column(Integer)
     bin = Column(Integer)
-    catagory_id = Column(Integer, ForeignKey('catagory.id'))
-    catagory = relationship(Catagory)
+    category_id = Column(Integer, ForeignKey('category.id'))
+    category = relationship(Category)
     item_image = Column(String(250))
 

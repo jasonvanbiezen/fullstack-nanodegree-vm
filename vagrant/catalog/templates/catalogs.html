@@ -14,7 +14,7 @@
 {% if catalogs %}
 {% for catalog in catalogs %}
 <div style="width:1000px;margin:0 auto;">
-    <a href="{{url_for('show_catagories', catalog_id=catalog.id)}}">
+    <a href="{{url_for('show_categories', catalog_id=catalog.id)}}">
         {% include "catalog_header.html" %}
     </a>
 </div>

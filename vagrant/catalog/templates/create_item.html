@@ -4,7 +4,7 @@
 {% include "header.html" %}
 
 {% include "catalog_header.html" %}
-{% include "catagory_header.html" %}
+{% include "category_header.html" %}
 
 <div style="text-align:center;">
 {% if item %}
@@ -15,7 +15,7 @@
 </div>
 
 <div class="width-6 center">
-  <form method="post" enctype="multipart/form-data" {% if item %}action="{{url_for('edit_item', item_id=item.id)}}"{% else %}action="{{url_for('create_item', catagory_id=catagory.id)}}"{% endif %}>
+  <form method="post" enctype="multipart/form-data" {% if item %}action="{{url_for('edit_item', item_id=item.id)}}"{% else %}action="{{url_for('create_item', category_id=category.id)}}"{% endif %}>
     <div class="form-group">
       <label for="item_name" class="col-sm-3 control-label" style="display:inline;">Item Name:</label>
       <input class="form-control" id="item_name" name="item_name" type="text" style="display:inline;width:400px;" value="{% if item_name %}{{item_name}}{%elif item%}{{item.name}}{% else %}{%endif%}">
