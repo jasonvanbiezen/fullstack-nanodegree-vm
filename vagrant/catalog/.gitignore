@@ -1,5 +1,5 @@
 *.swp
-*_secrets.json
+*_env.sh
 *.pyc
 *.png
 *.pdf

@@ -32,12 +32,17 @@ from bfs_core_database import Base, User, Image, Catalog, Category, Item
 
 from flask import session
 import random, string
-
 from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import FlowExchangeError
 import httplib2, json
 from flask import make_response
 import requests
+
+GCLIENT_ID = os.environ.get('CATALOG_DB_GCLIENT_ID')
+GCLIENT_SECRET = os.environ.get('CATALOG_DB_GSECRET_KEY')
+FBCLIENT_ID = os.environ.get('CATALOG_DB_FBCLIENT_ID')
+FBCLIENT_SECRET = os.environ.get('CATALOG_DB_FBCLIENT_KEY')
 
 #
 #######
@@ -49,8 +54,6 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 db = DBSession()
 
-CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
 
 #######
 #
@@ -81,7 +84,7 @@ def requires_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -235,13 +238,18 @@ def gconnect():
         return response
     # Obtain authorization code
     code = request.data
+    print "code: %s" % code
 
     try:
-        # Upgrade the authorization code into a credentials object
+        # Upgrade the authorization code into a credentials objectj
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
+        oauth_flow.client_secret = GCLIENT_SECRET
+        oauth_flow.client_id = GCLIENT_ID
+        #oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
+        print "failed authorization"
         response = make_response(
             json.dumps('Failed to upgrade the authorization code.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -249,10 +257,12 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
+    print "access token: %s" % access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
+    print "result: %s" % json.dumps(result) 
     # If there was an error in the access token info, abort.
     if result.get('danger') is not None:
         response = make_response(json.dumps(result.get('danger')), 500)
@@ -267,7 +277,7 @@ def gconnect():
         return response
 
     # Verify that the access token is valid for this app.
-    if result['issued_to'] != CLIENT_ID:
+    if result['issued_to'] != GCLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -338,14 +348,9 @@ def fbconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     access_token = request.data
-    print "access token received %s " % access_token
 
-    app_id = json.loads(open('fb_client_secrets.json', 'r').read())[
-        'web']['app_id']
-    app_secret = json.loads(
-        open('fb_client_secrets.json', 'r').read())['web']['app_secret']
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+        FBCLIENT_ID, FBCLIENT_SECRET, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
