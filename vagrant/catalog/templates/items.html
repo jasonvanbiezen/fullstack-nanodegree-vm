@@ -4,6 +4,9 @@
 {% include "header.html" %}
 
 {% include "catalog_header.html" %}
+<script>
+setElementToFullWidth('catalog_{{catalog.name}}');
+</script>
 {% include "category_header.html" %}
 
 <div style="width:400px;margin:0 auto;">
@@ -15,6 +18,10 @@
 </div>
 <br>
 <hr>
+{% include "facebook_like_button.html" %}
+<div class="" style="text-align:center;width:100%;">
+    <h3>Items:</h3>
+</div>
 <table style="width:930px;margin:0 auto;">
 {% for items in get_item_rows(category.id) %}
 <tr>
@@ -30,7 +37,6 @@
         {%endif%}
         <br>
         <strong>{{items[0].name}}</strong><br>
-        {{items[0].description}}<br>
     </a>
     {% if catalog.user_id == session.get('user_id') %}
       <a href="{{url_for('delete_item', item_id=items[0].id)}}"><button>Delete Item</button></a> &nbsp;
@@ -50,7 +56,6 @@
         {%endif%}
         <br>
         <strong>{{items[1].name}}</strong><br>
-        {{items[1].description}}<br>
     </a>
     {% if catalog.user_id == session.get('user_id') %}
     <a href="{{url_for('delete_item', item_id=items[1].id)}}"><button>Delete Item</button></a> &nbsp;
@@ -72,7 +77,6 @@
         {%endif%}
         <br>
         <strong>{{items[2].name}}</strong><br>
-        {{items[2].description}}<br>
     </a>
     {% if catalog.user_id == session.get('user_id') %}
     <a href="{{url_for('delete_item', item_id=items[2].id)}}"><button>Delete Item</button></a> &nbsp;

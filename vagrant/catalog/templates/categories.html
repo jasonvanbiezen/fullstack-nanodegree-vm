@@ -6,15 +6,20 @@
 <script>
 setElementToFullWidth('catalog_{{catalog.name}}');
 </script>
+<br>
 <div style="width:400px;margin:0 auto;">
     {% if catalog.user_id == session.get('user_id') %}
     <a href="{{url_for('create_category', catalog_id=catalog.id)}}"><button>Create new Category</button></a> &nbsp; &nbsp; 
     <a href="{{url_for('delete_catalog', catalog_id=catalog.id)}}"><button>Delete Catalog</button></a> &nbsp; &nbsp; 
-    <a href="#"><button>Edit Catalog</button></a>
+    <a href="{{url_for('edit_catalog', catalog_id=catalog.id)}}"><button>Edit Catalog</button></a>
     {% endif %}
 </div>
 <br>
 <hr>
+{% include "facebook_like_button.html" %}
+<div class="" style="text-align:center;width:100%;">
+    <h3>Catalogs:</h3>
+</div>
 <table style="width:930px;margin:0 auto;">
 {% for categories in get_category_rows(catalog.id) %}
 <tr>

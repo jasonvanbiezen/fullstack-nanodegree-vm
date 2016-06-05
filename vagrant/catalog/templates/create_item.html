@@ -25,9 +25,10 @@
       <textarea class="form-control" id="description" name="description" type="text" rows="10">{% if description %}{{description}}{%elif item%}{{item.description}}{%else%}{%endif%}</textarea>
     </div>
     <div class="form-group">
+      {% if item and item.item_image %} <img style="display:inline;width:30px;height:30px;" src="{{url_for('uploaded_file', filename=item.item_image)}}">{% endif %}
       <label for="image" class="col-sm-3 control-label">Item Image (300px X 300px):</label>
-      {% if item and item.item_image %} <img style="display:inline;width:30px;height:30px;" src="{{url_for('uploaded_file', filename=item.item_image)}}">{% endif %} <input id="image" name="image" type="file" style="display:inline;">
-      {% if item and item.item_image %}<input id="delete_image" name="delete_image" type="checkbox" style="display:inline;"> Delete Image{% endif %}
+      <input id="image" name="image" type="file" style="display:inline;">
+      {% if item and item.item_image %}<input id="delete_image" name="delete_image" type="checkbox" style="display:inline;" {% if delete_image %}checked{% endif %}> Delete Image{% endif %}
     </div>
     <br>
     <div class="form-group">

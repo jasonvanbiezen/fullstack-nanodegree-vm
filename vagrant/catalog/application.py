@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask import flash
 from werkzeug import secure_filename
 from flask import send_from_directory
+import logging
 
 from functools import wraps
 app = Flask(__name__)
@@ -132,7 +133,10 @@ def save_image(file):
     return None
 
 def remove_file(filename):
-    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    try: 
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    except OSError as err:
+        logging.warning("Error removing uploaded file '{0}'.".format(err))
     
 def remove_catalog(catalog_id):
     """ 
@@ -514,12 +518,11 @@ def create_catalog():
        else:
            image = None
        new_catalog = Catalog(name=name,
-                            public=public,
-                            user_id=session['user_id'],
-                            header_image = image.filename if image else None)
+                             public=public,
+                             user_id=session['user_id'],
+                             header_image = image.filename if image else None)
        db.add(new_catalog)
        db.commit()
-       new_catalog = db.query(Catalog).filter_by(name=name).first()
        flash("New catalog '" + name + "' added!", 'success')
        return redirect(url_for('show_categories', catalog_id=new_catalog.id))
 
@@ -535,14 +538,61 @@ def show_categories(catalog_id):
                            catalog=catalog,
                            categories=categories)
 
-@app.route('/catalog/<int:catalog_id>/delete', methods=['GET','POST'])
+@app.route('/catalog/<int:catalog_id>/edit/', methods=['GET', 'POST'])
+@requires_login
+def edit_catalog(catalog_id):
+    catalog = db.query(Catalog).filter_by(id = catalog_id).first()
+    if not catalog:
+        flash("That catalog does not exist!", 'warning')
+        return redirect(url_for('show_catalogs'))
+    if request.method == 'GET':
+        return render_template('create_catalog.html', catalog=catalog)
+    elif request.method == 'POST':
+        name = request.form.get('name')
+        delete_image = True if request.form.get('delete_image') else False
+        public = True if request.form.get('public') else False
+        file = request.files['header_image']
+        if not name:
+            flash("Catalog name is required!", 'danger')
+            return render_template('create_catalog.html',
+                                   catalog = catalog,
+                                   name = name,
+                                   public = public,
+                                   delete_image = delete_image)
+        old_image = catalog.header_image
+        if delete_image and old_image:
+            db.query(Image).filter_by(filename=old_image).delete()
+            catalog.header_image = None
+            remove_file(old_image)
+        elif file and allowed_image_file(file.filename):
+            # If a valid image file was provided
+            # User is changing catalog image
+            image = save_image(file)
+            if image: # double check image was saved
+                # Remove old item image if it exists
+                if old_image:
+                    db.query(Image).filter_by(filename=old_image).delete()
+                    remove_file(old_image)
+                catalog.header_image = image.filename
+        catalog.name = name
+        catalog.public = public
+        db.commit()
+        edited_catalog = db.query(Catalog).filter_by(id = catalog_id).first()
+        if edited_catalog:
+            flash('Catalog %s updated!' % name, 'success')
+            return redirect(url_for('show_categories', catalog_id=catalog.id))
+        else:
+            flash('An error occured while updating catalog.', 'danger')
+            return redirect(url_for('show_catalogs'))
+
+@app.route('/catalog/<int:catalog_id>/delete/', methods=['GET', 'POST'])
 @requires_login
 def delete_catalog(catalog_id):
     if request.method == 'GET':
         catalog = db.query(Catalog).filter_by(id = catalog_id).first()
         if not catalog:
             flash("Cannot delete catalog: does not exist", 'danger')
-            return redirect(url_for('catalogs'))
+            return redirect(url_for('show_catalogs'))
         else:
             return render_template('delete_catalog.html',
                                    catalog=catalog)
@@ -600,11 +650,10 @@ def create_category(catalog_id):
                                                        if image else None)
                 db.add(new_category)
                 db.commit()
-                category = db.query(Category).filter_by(name=name).first()
                 flash('New category ' + name + 
                       ' created in catalog ' + catalog.name, 'success')
                 return redirect(url_for('show_items',
-                                        category_id=category.id))
+                                        category_id=new_category.id))
             else:
                 flash('A valid name is required.', 'danger')
                 return redirect(url_for('create_category',
@@ -641,10 +690,6 @@ def edit_category(category_id):
             description = request.form.get('description')
             file = request.files['image']
             delete_image = request.form.get('delete_image')
-            print name
-            print description
-            print file.filename
-            print delete_image
             if name:
                 if category.name != name:
                     existing_cat = db.query(Category)\
@@ -657,7 +702,8 @@ def edit_category(category_id):
                                                catalog=catalog,
                                                category=category,
                                                name = name,
-                                               description = description)
+                                               description = description,
+                                               delete_image = delete_image)
                 if delete_image:
                     old_image = category.category_image
                     if old_image:
@@ -871,8 +917,17 @@ def edit_item(item_id):
                                    catalog = catalog,
                                    category = category,
                                    item = item,
+                                   item_name = item_name,
+                                   description = description,
+                                   price = price,
+                                   quantity = quantity,
+                                   row = row,
+                                   rbin = rbin,
+                                   delete_item = delete_item,
                                    user_id = catalog.user_id)
 
+        # User attempting to change item name.  Check to ensure item name
+        # isn't already in this catagory
         if item.name != item_name:
             existing_item = db.query(Item)\
                               .filter_by(name=item_name,
@@ -885,6 +940,13 @@ def edit_item(item_id):
                                        catalog = catalog,
                                        category = category,
                                        item = item,
+                                       item_name = item_name,
+                                       description = description,
+                                       price = price,
+                                       quantity = quantity,
+                                       row = row,
+                                       rbin = rbin,
+                                       delete_item = delete_item,
                                        user_id = catalog.user_id)
 
 

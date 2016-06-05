@@ -29,7 +29,7 @@
       <label for="image" class="col-sm-3 control-label" style="display:inline;">Category Image: (300px X 300px)</label>
       <input id="image" name="image" type="file" style="display:inline;">
       {% if category and category.category_image %}
-      <input type="checkbox" name="delete_image" id="delete_image"> Delete Image
+      <input type="checkbox" name="delete_image" id="delete_image" {% if delete_image %}checked{% endif %}> Delete Image
       {% endif %}
     </div>
     <br>

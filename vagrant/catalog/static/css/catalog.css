@@ -4,6 +4,36 @@
     text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
 }
 
+.catalog-image { 
+   position: relative; 
+   width: 100%;
+}
+
+.catalog-text { 
+   position: absolute; 
+   top: 50px; 
+   left: 0; 
+   width: 100%; 
+}
+
+.catalog-text span {
+   color: white;
+   font: bold 32px/56px Helvetica, Sans-Serif;
+   letter-spacing: -1px;
+   background: rgb(0, 0, 0);
+   background: rgba(0, 0, 0, 0.7);
+   padding: 10px;
+}
+
+span.spacer {
+   padding:0 5px;
+}
+
+.spacer {
+    display: inline;
+    padding: 0 5px;
+}
+
 .full-width {
     background-size:100%;
     background-repeat:no-repeat;
