@@ -40,10 +40,10 @@ Item Catalog Database Project with User Authentication and Public/Private Catalo
 4. Navigation to the catalog project directory /vagrant/catalog.
 5. Google and Facebook oauth APIs will require client IDs and secrets.  The application looks for these in the following environment variables.
  1. Google Client ID: CATALOG_DB_GCLIENT_ID
-  * The client must have an authorized redirect URI and Javascript origin of 'http://localhost:5000/'
- 2. Google Client Secret: CATALOG_DB_GSECRET_KEY
- 3. Facebook Client ID: CATALOG_DB_FBCLIENT_ID
- 4. Facebook Client Secret: CATALOG_DB_FBCLIENT_KEY
+ 2. The Google Client must have an authorized redirect URI and Javascript origin of 'http://localhost:5000/'
+ 3. Google Client Secret: CATALOG_DB_GSECRET_KEY
+ 4. Facebook Client ID: CATALOG_DB_FBCLIENT_ID
+ 5. Facebook Client Secret: CATALOG_DB_FBCLIENT_KEY
 6. If launching for the first time, run database_setup.py
  * # python database_setup.py
 7. Launch the web application
