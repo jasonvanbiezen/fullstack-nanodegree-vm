@@ -1,13 +1,13 @@
 #[Fullstack Nanodegree Projects]
 
-Udacity Fullstack Nanodegree Projects.  Contains project 2.
+Udacity Fullstack Nanodegree Projects.
 By: [Jason van Biezen](https://github.com/jasonvanbiezen)
 
 ## Contents
 
 - [Requirements](#requirements)
-- [Project 2](#project2)
-- [Project 4](#project4)
+- [Tournament Database Project](#tournament_database_project)
+- [Item Catalog Project](#item_catalog_project)
 - [License](#license)
 
 ## Requirements
@@ -17,7 +17,7 @@ By: [Jason van Biezen](https://github.com/jasonvanbiezen)
 3. Vagrant
 4. VirtualBox (Or other virtual PC)
 
-## Project 2
+## Tournament Database Project
 
 Swiss Tournament Database Sceme and Python methods and test driver.  Instructions below for launching tests in a vagrant session.
 
@@ -28,7 +28,7 @@ Swiss Tournament Database Sceme and Python methods and test driver.  Instruction
 5. Project includes database file tournament.sql, tournament methods in tournament.py, and unit test file tournament_test.py
 6. Run tests by executing the test file: # python tournament_test.py
 
-## Project 4
+## Item Catalog Project
 
 Item Catalog Database Project with User Authentication and Public/Private Catalogs of items, organized by category.  Please read below for installation instructions.  
 
@@ -51,5 +51,5 @@ Item Catalog Database Project with User Authentication and Public/Private Catalo
 
 ## License
 
-Code in this repository is licensed under [GPLv2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).  However, using this code directly in your Udacity project will constitute a violation of the code of conduct you agreed to when taking your course; please use my code for reference purposes only in this case.
+Code in this repository is licensed under [GPLv2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).  If you use my code in your project, or find it useful, I only ask that you add my name and a link to my github repo.  However, using this code directly in your Udacity project will constitute a violation of the code of conduct you agreed to when taking your course; please use my code for reference purposes only in this case.
 
