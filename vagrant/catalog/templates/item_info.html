@@ -1,0 +1,25 @@
+<div class="width-3 center">
+    <table style="border:0;"><tr>
+        <th colspan="2">
+          {% if item.item_image %}
+            <img class="width-3 center" src="{{url_for('uploaded_file', filename=item.item_image)}}"><br>
+          {% else %}
+            <div class="width-3 height-3" style="background-color: #dddddd;"></div>
+          {% endif %}
+            <h1 style="display:inline;">{{item.name}}</h1>
+        </th>
+    </tr><tr>
+        <td><strong>Description: </strong></td>
+        <td>{{item.description}}</td>
+    </tr><tr>
+        <td><strong>Price: </strong></td>
+        <td>${{item.price}}</td>
+    </tr><tr>
+        <td><strong>Quantity: </strong></td>
+        <td>{{item.quantity}}</td>
+    </tr></tr>
+        <td><strong>Location: </strong></td>
+        <td>Row: {{item.row}}<br>Bin: {{item.bin}}</td>
+    </tr></table>
+</div>
+

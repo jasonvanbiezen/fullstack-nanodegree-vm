@@ -3,7 +3,9 @@
 {% block content %}
 {% include "header.html" %}
 {% include "catalog_header.html" %}
-
+<script>
+setElementToFullWidth('catalog_{{catalog.name}}');
+</script>
 <div class="width-4 center">
     {% if category %}
     <h1>Edit category {{category.name}}</h1>

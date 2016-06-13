@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% include "header.html" %}
+{% include "catalog_header.html" %}
+<script>
+setElementToFullWidth('catalog_{{catalog.name}}');
+</script>
+{% include "category_header.html" %}
+
+{% include "item_info.html" %}
+<br>
+<hr>
+<br>
+<div class="width-3 center">
+<strong>Are you sure you want to delete this item?</strong><br>
+<form method="post" enctype="multipart/form-data" action="{{url_for('delete_item', item_id=item.id)}}">
+    <div style="width:150px;margin:0 auto;"><button type="submit" style="display:inline;" class="btn btn-success">Delete</button> | 
+    <a href="{{url_for('show_item', item_id=item.id)}}">Cancel</a>
+</form>
+<br>
+</div>
+
+
+{% endblock %}
+

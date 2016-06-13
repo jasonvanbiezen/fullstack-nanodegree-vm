@@ -1,9 +1,9 @@
-# Written by Jason van Biezen <github.com/jasonvanbiezen>, May 2016.
+# Written by Jason van Biezen <github.com/jasonvanbiezen>, June 2016.
 # This package was written to satisfy the Nanodegree requirements of Udacity's
 # Fullstack program.  This package, and all project code hosted publicly
 # on my github.com page is free to use.  I only ask that, if my work
 # is useful to you, or if you reuse my code, please give me credit
-# in your readme.  
+# in your readme.
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Boolean, Text
 from sqlalchemy.dialects.sqlite import BLOB
@@ -29,7 +29,7 @@ class User(Base):
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
+       """Return User data in JSON format"""
        return {
            'name'         : self.name,
            'id'           : self.id,
@@ -43,6 +43,14 @@ class Image(Base):
     id = Column(Integer, primary_key=True)
     filename = Column(String(250), nullable=False)
 
+    @property
+    def serialize(self):
+       """Return Image data in JSON format"""
+       return {
+           'id'           : self.id,
+           'filename'     : self.filename,
+       }
+
 class Catalog(Base):
     __tablename__ = "catalog"
 
@@ -53,6 +61,17 @@ class Catalog(Base):
     user = relationship(User)
     header_image = Column(String(250))
 
+    @property
+    def serialize(self):
+        """ Return Catalog information in JSON format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'public' : self.public,
+            'user_id' : self.user_id,
+            'header_image' : self.header_image,
+        }
+
 class Category(Base):
     __tablename__ = "category"
     
@@ -62,6 +81,17 @@ class Category(Base):
     catalog_id = Column(Integer, ForeignKey('catalog.id'))
     catalog = relationship(Catalog)
     category_image = Column(String(250))
+
+    @property
+    def serialize(self):
+        """ Return Category information in JSON format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'description' : self.description,
+            'catalog_id' : self.catalog_id,
+            'category_image' : self.category_image,
+        }
 
 class Item(Base):
     __tablename__ = "item"
@@ -76,4 +106,25 @@ class Item(Base):
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
     item_image = Column(String(250))
+
+    @property
+    def serialize(self):
+        """ Return Item information in JSON format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'description' : self.description,
+            'quantity' : self.quantity,
+            'price' : self.price,
+            'row' : self.row,
+            'bin' : self.bin,
+            'category_id' : self.category_id,
+            'item_image' : self.item_image,
+        }
+        
+def jsonify_db_list(l):
+    jl = []
+    for i in range(len(l)):
+        jl.append(l[i].serialize)
+    return jl
 

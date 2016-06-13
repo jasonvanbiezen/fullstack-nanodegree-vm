@@ -13,33 +13,14 @@ setElementToFullWidth('catalog_{{catalog.name}}');
 <!--<button onclick="goBack();">Back</button>-->
 <a href="{{url_for('show_items', category_id=item.category_id)}}"><button>Back</button></a>
 </h3>
-<div class="width-3 center">
-    <table style="border:0;"><tr>
-        <th colspan="2">
-          {% if item.item_image %}
-            <img class="width-3 center" src="{{url_for('uploaded_file', filename=item.item_image)}}"><br>
-          {% else %}
-            <div class="width-3 height-3" style="background-color: #dddddd;"></div>
-          {% endif %}
-            <h1 style="display:inline;">{{item.name}}</h1>
-        </th>
-    </tr><tr>
-        <td><strong>Description: </strong></td>
-        <td>{{item.description}}</td>
-    </tr><tr>
-        <td><strong>Price: </strong></td>
-        <td>${{item.price}}</td>
-    </tr><tr>
-        <td><strong>Quantity: </strong></td>
-        <td>{{item.quantity}}</td>
-    </tr></tr>
-        <td><strong>Location: </strong></td>
-        <td>Row: {{item.row}}<br>Bin: {{item.bin}}</td>
-    </tr></table>
-</div>
+
+{% include "item_info.html" %}
 
 {% if 'user_id' in session and session['user_id'] == catalog.user_id %}
-<div style="width:50px;margin:0 auto;"><a href="{{url_for('edit_item', item_id = item.id)}}"><button>Edit</button></a></div>
+<div style="width:150px;margin:0 auto;">
+<a href="{{url_for('edit_item', item_id = item.id)}}"><button style='display:inline;'>Edit</button></a> | 
+<a href="{{url_for('delete_item', item_id = item.id)}}"><button>Delete</button></a>
+</div>
 {% endif %}
 
 {% endblock %}

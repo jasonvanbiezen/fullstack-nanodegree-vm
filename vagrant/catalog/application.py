@@ -1,7 +1,14 @@
 #
 # Item Catalog webserver
-# By: Jason van Biezen
-# 
+# By: Jason van Biezen <github.com/jasonvanbiezen>
+# Last Edit: June 2016.
+#
+# This package was written to satisfy the Nanodegree requirements of Udacity's
+# Fullstack program.  This package, and all project code hosted publicly
+# on my github.com page is free to use.  I only ask that, if my work
+# is useful to you, or if you reuse my code, please give me credit
+# in your readme.
+#
 
 import sys
 sys.path.insert(0, 'libs')
@@ -24,6 +31,7 @@ from sqlalchemy import create_engine, asc, or_, and_
 from sqlalchemy.orm import sessionmaker
 
 from bfs_core_database import Base, User, Image, Catalog, Category, Item
+from bfs_core_database import jsonify_db_list
 
 #######
 #
@@ -54,6 +62,11 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 db = DBSession()
 
+# Create JSON response:
+def create_json_response(j, code):
+    response = make_response(j, code)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 #######
 #
@@ -90,7 +103,6 @@ def requires_login(f):
 
 #
 #######
-
 
 #######
 #
@@ -491,11 +503,34 @@ def show_catalogs():
 
     return render_template('catalogs.html', catalogs=catalogs)
 
+@app.route('/catalogs/json/', methods=['GET'])
+def show_catalogs_json():
+    if 'user_id' in session:
+        catalogs = db.query(Catalog) \
+                     .filter(or_(Catalog.public == True,
+                                 Catalog.user_id == session['user_id']
+                                )
+                            ) \
+                     .all()
+    else:
+        catalogs = db.query(Catalog).filter_by(public = True).all()
+
+    response = make_response(json.dumps({'catalogs': jsonify_db_list(catalogs)}), 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
 @app.route('/catalogs/user/')
 @requires_login
 def user_catalogs():
     catalogs = db.query(Catalog).filter_by(user_id=session['user_id']).all()
     return render_template('catalogs.html', catalogs=catalogs)
+
+@app.route('/catalogs/user/json/')
+@requires_login
+def user_catalogs_json():
+    catalogs = db.query(Catalog).filter_by(user_id=session['user_id']).all()
+    return create_json_response(
+        json.dumps({'catalogs': jsonify_db_list(catalogs)}), 200)
 
 @app.route('/catalogs/create/', methods=['GET','POST'])
 @requires_login
@@ -542,6 +577,17 @@ def show_categories(catalog_id):
     return render_template('categories.html', 
                            catalog=catalog,
                            categories=categories)
+
+@app.route('/catalog/<int:catalog_id>/json', methods=['GET'])
+@app.route('/catalog/<int:catalog_id>/categories/json', methods=['GET'])
+def show_categories_json(catalog_id):
+    catalog = db.query(Catalog).filter_by(id = catalog_id).first()
+    if not catalog:
+        return create_json_response(
+            json.dumps({'error': 'Catalog could not be found.'}, 404))
+    categories = db.query(Category).filter_by(catalog_id = catalog_id).all()
+    return create_json_response(
+        json.dumps({'categories': jsonify_db_list(categories)}), 200)
 
 @app.route('/catalog/<int:catalog_id>/edit/', methods=['GET', 'POST'])
 @requires_login
@@ -750,6 +796,18 @@ def show_items(category_id):
         flash('That category does not exist.', 'danger')
         return redirect(url_for('show_categories',catalog_id=catalog_id))
 
+@app.route('/category/<int:category_id>/json')
+@app.route('/category/<int:category_id>/items/json')
+def show_items_json(category_id):
+    category = db.query(Category).filter_by(id=category_id).first()
+    if category:
+        items = db.query(Item).filter_by(category_id=category.id).all()
+        return create_json_response(
+            json.dumps({'items': jsonify_db_list(items)}), 200)
+    else:
+        return create_json_response(
+            json.dumps({'error': 'Category could not be found.'}, 404))
+
 @app.route('/category/<int:category_id>/item/create/', methods=['GET','POST'])
 @requires_login
 def create_item(category_id):
@@ -880,6 +938,18 @@ def show_item(item_id):
     else:
         flash("No such item!", 'danger')
         return redirect(url_for('show_catalogs'))
+        
+        
+ 
+@app.route('/item/<int:item_id>/json', methods=['GET'])
+def show_item_json(item_id):
+    item = db.query(Item).filter_by(id=item_id).first()
+    if item:
+        return create_json_response(
+            json.dumps({'items': item.serialize}), 200)
+    else:
+        return create_json_response(
+            json.dumps({'error': 'Requested item does not exist.'}), 404)
 
 @app.route('/item/<int:item_id>/edit/', methods=['GET','POST'])
 @requires_login
@@ -1003,7 +1073,7 @@ def delete_item(item_id):
                 flash("Item %s deleted" % name , 'success')
             else:
                 flash("Could not delete item", 'danger')
-            return redirect(url_for('show_items', category=category, catalog=catalog))
+            return redirect(url_for('show_items', category_id=category.id))
     else:
         flash("Item does not exist.", 'danger')
         return redirect(url_for('show_catalogs'))
