@@ -18,13 +18,14 @@
       {% if catalog and catalog.header_image %}
       <img style="display:inline;width:100px;height:20px;" src="{{url_for('uploaded_file', filename=catalog.header_image)}}">
       {% endif %}
-      <label style="display:inline;" for="header_image" class="col-sm-3 control-label">Catalog Image:</label>
+      <label style="display:inline;" for="header_image" class="col-sm-3 control-label">Catalog Image: (1000px X 100 px)</label>
       <input style="display:inline;" id="header_image" name="header_image" type="file">
       {% if catalog and catalog.header_image %}
       <br />
       <input type="checkbox" name="delete_image" id="delete_image" {% if delete_image %}checked{% endif %}> Delete Image
       {% endif %}
     </div>
+      <i>Recommended Image Ratio is 10:1 width to height</i>
     <div class="form-group">
       <input type="checkbox" name="public" {% if (catalog and catalog.public) or public%}checked{% endif %}><label for="name" class="col-sm-3 control-label"> Public Catalog?</label>
     </div>
